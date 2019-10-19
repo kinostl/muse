@@ -13,9 +13,12 @@ const debug = require('debug');
 const PORT = 1212;
 const HOST = "localhost";
 let debug_sockets = {};
+let debug_logs = {
+	"core": debug("core")
+};
 
 function DebugSocket(message, data){
-	let _debug = debug(message);
+	let _debug = debug_logs[message];
 	_debug(data);
 }
 
@@ -34,7 +37,7 @@ ChatServer.prototype.isNicknameLegal = function(nickname) {
 };
 
 ChatServer.prototype.handleConnection = function(connection) {
-	console.log("Incoming connection from " + connection.remoteAddress);
+	debug_logs["core"]("Incoming connection from " + connection.remoteAddress);
 	connection.setEncoding("utf8");
 
 	var chatter = new Chatter(connection, this);
@@ -95,13 +98,17 @@ Chatter.prototype.subscribe = function(channel) {
 	if(!debug_sockets[channel]){
 		debug_sockets[channel] = PubSub.subscribe(channel,DebugSocket);
 	}
+	if(!debug_logs[channel]){
+		debug_logs[channel] = debug(channel);
+	}
 }
 
 Chatter.prototype.unsubscribe = function(channel) {
 	PubSub.unsubscribe(this.channels[channel]);
 	delete this.channels[channel];
-	if(channel.split().length > 2 && deb_sockets[channel]){
+	if(channel.split().length > 2){
 		delete debug_sockets[channel]
+		delete debug_logs[channel]
 	}
 }
 
@@ -159,4 +166,4 @@ SocketLineBuffer.prototype.handleData = function(data) {
 
 // Start the server!
 server = new ChatServer();
-console.log("Started on "+HOST+" "+PORT);
+debug_logs["core"]("Started on "+HOST+" "+PORT);

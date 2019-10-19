@@ -12,10 +12,19 @@ const debug = require('debug');
 
 const PORT = 1212;
 const HOST = "localhost";
+
 let debug_sockets = {};
 let debug_logs = {
 	"core": debug("core")
 };
+
+let CHANNEL_PREFIX="+";
+let channel_names=[
+	"general",
+	"cooking"
+]
+
+let COMMAND_PREFIX="@";
 
 function DebugSocket(message, data){
 	let _debug = debug_logs[message];
@@ -50,16 +59,53 @@ ChatServer.prototype.handleConnection = function(connection) {
 };
 
 ChatServer.prototype.handleChat = function(chatter, message) {
-	PubSub.publish("chat.general", chatter.nickname + " says, \"" + message+"\"");
+	if(message.startsWith(CHANNEL_PREFIX)){
+		let [channel_id, say_string]= message.trim().split(" ",2);
+		channel_id = channel_id.slice(1);
+		let channel_name = channel_names.find((o)=>o.includes(channel_id));
+		if(channel_name){
+			if(chatter.subscribedTo("chat."+channel_name)){
+				PubSub.publish("chat."+channel_name, chatter.nickname + " says, \"" +say_string+"\".");
+			}else{
+				PubSub.publish("chat.system."+chatter.id, "Not connected to `"+channel_name+"`. Connect with `@chan/on`.");
+			}
+		}else{
+			PubSub.publish("chat.system."+chatter.id, "Could not find a channel that contains `"+channel_id+"`.");
+		}
+	}
+	if(message.startsWith(COMMAND_PREFIX)){
+		let [command,target] = message.trim().split(" ",2);
+		command = command.slice(1);
+		let channel_id = target;
+		let channel_name = channel_names.find((o)=>o.includes(channel_id));
+		if(command === "chan/list"){
+			PubSub.publish("chat.system."+chatter.id, "Channels: "+channel_names.join(","));
+		}else if(channel_name){
+			if(command === "chan/on"){
+				if(chatter.subscribedTo("chat."+channel_name)){
+					PubSub.publish("chat.system."+chatter.id, "Already connected to `"+channel_name+"`.");
+				}else{
+					chatter.subscribe("chat."+channel_name);
+				}
+			}
+			if(command === "chan/off"){
+				if(chatter.subscribedTo("chat."+channel_name)){
+					chatter.unsubscribe("chat."+channel_name);
+				}else{
+					PubSub.publish("chat.system."+chatter.id, "Already disconnected from `"+channel_name+"`.");
+				}
+			}
+		}else{
+			PubSub.publish("chat.system."+chatter.id, "Could not find a channel that contains `"+channel_id+"`.");
+		}
+	}
 };
 
 ChatServer.prototype.handleJoin = function(chatter) {
 	chatter.subscribe("chat.general");
-	PubSub.publish("chat.general", chatter.nickname + " has joined the chat.");
 };
 
 ChatServer.prototype.handleLeave = function(chatter) {
-	PubSub.publish("chat.general", chatter.nickname + " has left the chat.");
 	chatter.unsubscribe("chat.general");
 };
 
@@ -93,8 +139,13 @@ Chatter.prototype.send = function(message, data) {
 	}
 };
 
+Chatter.prototype.subscribedTo = function(channel){
+	return this.channels.hasOwnProperty(channel);
+}
+
 Chatter.prototype.subscribe = function(channel) {
 	this.channels[channel] = PubSub.subscribe(channel,this.send.bind(this));
+	PubSub.publish("chat.general", this.nickname + " has joined the chat.");
 	if(!debug_sockets[channel]){
 		debug_sockets[channel] = PubSub.subscribe(channel,DebugSocket);
 	}
@@ -104,6 +155,7 @@ Chatter.prototype.subscribe = function(channel) {
 }
 
 Chatter.prototype.unsubscribe = function(channel) {
+	PubSub.publish("chat.general", this.nickname + " has left the chat.");
 	PubSub.unsubscribe(this.channels[channel]);
 	delete this.channels[channel];
 	if(channel.split().length > 2){

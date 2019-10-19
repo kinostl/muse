@@ -5,6 +5,7 @@
   "license": "MIT",
   "dependencies": {
     "debug": "^4.1.1",
-    "pubsub-js": "^1.7.0"
+    "pubsub-js": "^1.7.0",
+    "supports-color": "^7.1.0"
   }
 }

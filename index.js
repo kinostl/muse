@@ -27,8 +27,7 @@ let channel_names=[
 let COMMAND_PREFIX="@";
 
 function DebugSocket(message, data){
-	let _debug = debug_logs[message];
-	_debug(data);
+	debug_logs[message](data);
 }
 
 function ChatServer() {
@@ -51,8 +50,8 @@ ChatServer.prototype.handleConnection = function(connection) {
 
 	var chatter = new Chatter(connection, this);
 	this.ids++;
-	chatter.subscribe("chat.system."+chatter.id);
-	PubSub.publish("chat.system."+chatter.id, "Welcome! What is your nickname?");
+	chatter.subscribe("system."+chatter.id);
+	PubSub.publish("system."+chatter.id, "Welcome! What is your nickname?");
 	chatter.on("chat", this.handleChat.bind(this));
 	chatter.on("join", this.handleJoin.bind(this));
 	chatter.on("leave", this.handleLeave.bind(this));
@@ -67,23 +66,84 @@ ChatServer.prototype.handleChat = function(chatter, message) {
 			if(chatter.subscribedTo("chat."+channel_name)){
 				PubSub.publish("chat."+channel_name, chatter.nickname + " says, \"" +say_string+"\".");
 			}else{
-				PubSub.publish("chat.system."+chatter.id, "Not connected to `"+channel_name+"`. Connect with `@chan/on`.");
+				PubSub.publish("system."+chatter.id, "Not connected to `"+channel_name+"`. Connect with `@chan/on`.");
 			}
 		}else{
-			PubSub.publish("chat.system."+chatter.id, "Could not find a channel that contains `"+channel_id+"`.");
+			PubSub.publish("system."+chatter.id, "Could not find a channel that contains `"+channel_id+"`.");
 		}
 	}
+
 	if(message.startsWith(COMMAND_PREFIX)){
+		/**
+		 * help
+		 **/
+
+		/**
+		 * story/start
+		 * story/end
+		 * story/title
+		 * story/summary
+		 * story/invite
+		 **/
+
+		/**
+		 * chan/on
+		 * chan/off
+		 * chan/list
+		 * chan/as
+		 **/
+
+		/**
+		 * article/create
+		 * article/delete
+		 * article/name
+		 * article/summary
+		 * article/edit
+		 * article/type
+		 **/
+
+		/***
+		 * Player Account Functions
+		 ****/
+
+		/**
+		 * player/block
+		 * player/unblock
+		 **/
+
+
+		/**
+		 * account/create
+		 * account/delete
+		 * account/rename
+		 **/
+
+		/***
+		 * Administrative Functions
+		 ***/
+
+		/**
+		 * admin/ban
+		 * admin/unban
+		 **/
+
+		/**
+		 * chan/add
+		 * chan/delete
+		 * chan/type
+		 **/
+
+
 		let [command,target] = message.trim().split(" ",2);
 		command = command.slice(1);
 		let channel_id = target;
 		let channel_name = channel_names.find((o)=>o.includes(channel_id));
 		if(command === "chan/list"){
-			PubSub.publish("chat.system."+chatter.id, "Channels: "+channel_names.join(","));
+			PubSub.publish("system."+chatter.id, "Channels: "+channel_names.join(","));
 		}else if(channel_name){
 			if(command === "chan/on"){
 				if(chatter.subscribedTo("chat."+channel_name)){
-					PubSub.publish("chat.system."+chatter.id, "Already connected to `"+channel_name+"`.");
+					PubSub.publish("system."+chatter.id, "Already connected to `"+channel_name+"`.");
 				}else{
 					chatter.subscribe("chat."+channel_name);
 				}
@@ -92,11 +152,11 @@ ChatServer.prototype.handleChat = function(chatter, message) {
 				if(chatter.subscribedTo("chat."+channel_name)){
 					chatter.unsubscribe("chat."+channel_name);
 				}else{
-					PubSub.publish("chat.system."+chatter.id, "Already disconnected from `"+channel_name+"`.");
+					PubSub.publish("system."+chatter.id, "Already disconnected from `"+channel_name+"`.");
 				}
 			}
 		}else{
-			PubSub.publish("chat.system."+chatter.id, "Could not find a channel that contains `"+channel_id+"`.");
+			PubSub.publish("system."+chatter.id, "Could not find a channel that contains `"+channel_id+"`.");
 		}
 	}
 };
@@ -175,8 +235,8 @@ Chatter.prototype.handleNickname = function(nickname) {
 		this.lineBuffer.on("line", this.handleChat.bind(this));
 		this.emit("join", this);
 	} else {
-		PubSub.publish("chat.system."+this.id, "Sorry, but that nickname is not legal or is already in use!");
-		PubSub.publish("chat.system."+this.id, "What is your nickname?");
+		PubSub.publish("system."+this.id, "Sorry, but that nickname is not legal or is already in use!");
+		PubSub.publish("system."+this.id, "What is your nickname?");
 	}
 };
 

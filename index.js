@@ -145,7 +145,9 @@ Chatter.prototype.subscribedTo = function(channel){
 
 Chatter.prototype.subscribe = function(channel) {
 	this.channels[channel] = PubSub.subscribe(channel,this.send.bind(this));
-	PubSub.publish("chat.general", this.nickname + " has joined the chat.");
+	if(channel.startsWith("chat")){
+		PubSub.publish(channel, this.nickname + " has joined the chat.");
+	}
 	if(!debug_sockets[channel]){
 		debug_sockets[channel] = PubSub.subscribe(channel,DebugSocket);
 	}
@@ -155,7 +157,9 @@ Chatter.prototype.subscribe = function(channel) {
 }
 
 Chatter.prototype.unsubscribe = function(channel) {
-	PubSub.publish("chat.general", this.nickname + " has left the chat.");
+	if(channel.startsWith("chat")){
+		PubSub.publish(channel, this.nickname + " has left the chat.");
+	}
 	PubSub.unsubscribe(this.channels[channel]);
 	delete this.channels[channel];
 	if(channel.split().length > 2){

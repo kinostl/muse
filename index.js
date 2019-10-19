@@ -91,6 +91,14 @@ ChatServer.prototype.handleChat = function(chatter, message) {
 		 * chan/off
 		 * chan/list
 		 * chan/as
+		 * chan/title
+		 * chan/recall
+		 **/
+
+		/**
+		 * mail/send
+		 * mail/read
+		 * mail/delete
 		 **/
 
 		/**
@@ -109,6 +117,8 @@ ChatServer.prototype.handleChat = function(chatter, message) {
 		/**
 		 * player/block
 		 * player/unblock
+		 * player/ignore
+		 * player/unignore
 		 **/
 
 
@@ -121,6 +131,11 @@ ChatServer.prototype.handleChat = function(chatter, message) {
 		/***
 		 * Administrative Functions
 		 ***/
+
+		/**
+		 * account/add_role
+		 * account/remove_role
+		 **/
 
 		/**
 		 * admin/ban

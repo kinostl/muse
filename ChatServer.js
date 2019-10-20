@@ -17,7 +17,6 @@ function ChatServer(config) {
 	this.debug_sockets={};
 	this.ids=0;
 	this.command_prefix=config.command_prefix;
-	this.channel_prefix=config.channel_prefix;
 }
 
 ChatServer.prototype.isNicknameLegal = function(nickname) {
@@ -59,9 +58,7 @@ ChatServer.prototype.handleUnsubscribe = function(chatter, channel){
 }
 
 ChatServer.prototype.handleChat = function(chatter, message) {
-	if(message.startsWith(this.channel_prefix)){
-		ChannelHandler(chatter, message)
-	}else if(message.startsWith(this.command_prefix)){
+	if(message.startsWith(this.command_prefix)){
 		CommandHandler(chatter, message)
 	}else{
 		PubSub.publish("system." + chatter.id, "`"+message+"` isn't an option.");

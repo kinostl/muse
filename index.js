@@ -1,7 +1,6 @@
 const PORT = 1212;
 const HOST = "localhost";
 const COMMAND_PREFIX="@";
-const CHANNEL_PREFIX="+";
 
 const debug=require('debug');
 const db = require('./db');
@@ -11,7 +10,6 @@ db.knex.migrate.latest().then(()=>{
 	// Start the server!
 	server = new ChatServer({
 		"command_prefix": COMMAND_PREFIX,
-		"channel_prefix": CHANNEL_PREFIX,
 		"port": PORT,
 		"host": HOST
 	});

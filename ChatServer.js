@@ -3,7 +3,6 @@ const PubSub = require('pubsub-js');
 const net = require("net");
 const Chatter=require('./Chatter');
 const CommandHandler = require('./CommandHandler');
-const ChannelHandler = require('./ChannelHandler');
 
 /*******************************************************************************
  * ChatServer
@@ -28,7 +27,7 @@ ChatServer.prototype.isNicknameLegal = function(nickname) {
 };
 
 ChatServer.prototype.handleConnection = function(connection) {
-	debug("core")("Incoming connection from " + connection.remoteAddress);
+	debug("muse:core")("Incoming connection from " + connection.remoteAddress);
 	connection.setEncoding("utf8");
 
 	var chatter = new Chatter(connection, this);
@@ -45,7 +44,7 @@ ChatServer.prototype.handleConnection = function(connection) {
 ChatServer.prototype.handleSubscribe = function(chatter, channel){
 	if(!this.debug_sockets[channel]){
 		this.debug_sockets[channel] = PubSub.subscribe(channel,function(message, data){
-			debug(message)(data);
+			debug("muse:"+message)(data);
 		});
 	}
 }
@@ -66,10 +65,12 @@ ChatServer.prototype.handleChat = function(chatter, message) {
 };
 
 ChatServer.prototype.handleJoin = function(chatter) {
+	//TODO replace with Joined Channels
 	chatter.subscribe("chat.general");
 };
 
 ChatServer.prototype.handleLeave = function(chatter) {
+	//TODO replace with Joined Channels
 	chatter.unsubscribe("chat.general");
 };
 

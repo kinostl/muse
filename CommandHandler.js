@@ -12,23 +12,32 @@ const handlers = {
     //"account": require('./handlers/AccountHandler'),
 }
 
-module.exports = function (chatter, message) {
+module.exports = async function (chatter, message) {
     let [command, target] = message.trim().split(" ", 2);
     let args = command.slice(1).split("/");
     try{
         command = args[0];
         let handler = args[1];
-        if (
-            handlers.hasOwnProperty(command)
-            && handlers[command].handlers.hasOwnProperty(handler)
-        ) {
-            args.splice(0, 1);
-            handlers[command].handle(args, target, chatter, message);
-        } else {
-            throw new Error("`" + message + "` is not a valid command.");
+        let _commands = Object.keys(handlers).filter((o)=>o.includes(command));
+        if(!_commands){
+            throw new Error("`"+command+"` is not an option.");
         }
+        if(_commands.length > 1){
+            throw new Error("`"+command+"` is ambiguous. Please specify from these options: "+_commands.join(","));
+        }
+        command = _commands[0];
+
+        let _handlers = Object.keys(handlers[command]).filter((o)=>o.includes(handler));
+        if(!_handlers){
+            throw new Error("`"+handler+"` is not an option.");
+        }
+        if(_handlers.length > 1){
+            throw new Error("`"+handler+"` is ambiguous. Please specify from these options: "+_handlers.join(","));
+        }
+        args.splice(0, 1);
+        await handlers[command].handle(handler, target, chatter, message);
     }catch(e){
-        debug('core.error')(e);
+        debug('muse:core.error')(e);
         PubSub.publish("system." + chatter.id, e.message);
     }
 

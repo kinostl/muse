@@ -31,41 +31,45 @@ const permissions = {
 
 module.exports = {}
 module.exports.handlers = {
-    "on": async (args, target, chatter, message) => {
+    "on": async (target, chatter, message) => {
         if (chatter.subscribedTo("chat." + target)) {
             PubSub.publish("system." + chatter.id, "Already connected to `" + target + "`.");
         } else {
             chatter.subscribe("chat." + target);
         }
     },
-    "off": async (args, target, chatter, message) => {
+    "off": async (target, chatter, message) => {
         if (chatter.subscribedTo("chat." + target)) {
             chatter.unsubscribe("chat." + target);
         } else {
             PubSub.publish("system." + chatter.id, "Already disconnected from `" + target + "`.");
         }
     },
-    "say": async (args, target, chatter, message) => {
+    "say": async (target, chatter, message) => {
         if (chatter.subscribedTo("chat." + target)) {
             PubSub.publish("chat." + target, chatter.nickname + " says, \"" + say_string + "\".");
         } else {
             PubSub.publish("system." + chatter.id, "Not connected to `" + target + "`. Connect with `@channel/on`.");
         }
     },
-    "list": async (args, target, chatter, message) => {
-        let channel_names = await db.getChannelList();
-        PubSub.publish("system." + chatter.id, "Channels: " + channel_names.join(","));
+    "list": async (target, chatter, message) => {
+        let channels = await db.getChannelList();
+        if(channels.length > 0){
+            let channel_list = channels.reduce((list, channel) => list+"\r\n Name: "+channel.name+", Type: "+channel.type, "Channels: ");
+            PubSub.publish("system." + chatter.id, channel_list);
+        }else{
+            PubSub.publish("system." + chatter.id, "No Channels.");
+        }
     },
 };
-module.exports.handle = async function (args, target, chatter, message) {
-    let command = args[0];
-    if (requires["channel_name"].includes(command)) {
+module.exports.handle = async function (handler, target, chatter, message) {
+    if (requires["channel_name"].includes(handler)) {
         let channel_name = await db.getChannel(target);
-        if(channel_name.length < 1){
+        if (channel_name) {
+            target = channel_name;
+        } else {
             throw new Error("Could not find a channel that contains `" + target + "`.");
-        }else{
-            target = channel_name[0];
         }
     }
-    await module.exports.handlers[command](args, target, chatter, message);
+    await module.exports.handlers[handler](target, chatter, message);
 };

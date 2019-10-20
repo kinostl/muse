@@ -14,7 +14,7 @@ db.knex.migrate.latest().then(()=>{
 		"host": HOST
 	});
 
-	debug("core")("Started on " + HOST + " " + PORT);
+	debug("muse:core")("Started on " + HOST + " " + PORT);
 }).catch((e)=>{
-	debug("core.error")(e);
+	debug("muse:core.error")(e);
 })

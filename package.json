@@ -5,7 +5,9 @@
   "license": "MIT",
   "dependencies": {
     "debug": "^4.1.1",
+    "knex": "^0.19.5",
     "pubsub-js": "^1.7.0",
+    "sqlite3": "^4.1.0",
     "supports-color": "^7.1.0"
   }
 }

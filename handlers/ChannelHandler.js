@@ -2,7 +2,7 @@ const PubSub = require('pubsub-js');
 const db = require('../db');
 
 const requires = {
-    "channel_name": ["on", "off", "say"],
+    "channel": ["on", "off", "say"],
 };
 
 const permissions = {
@@ -31,28 +31,33 @@ const permissions = {
 
 module.exports = {}
 module.exports.handlers = {
-    "on": async (target, chatter, message) => {
-        if (chatter.subscribedTo("chat." + target)) {
-            PubSub.publish("system." + chatter.id, "Already connected to `" + target + "`.");
+    "on": async (args, chatter, line) => {
+        let channel=args[0];
+        if (chatter.subscribedTo("chat." + channel.name)) {
+            PubSub.publish("system." + chatter.id, "Already connected to `" + channel.name + "`.");
         } else {
-            chatter.subscribe("chat." + target);
+            chatter.subscribe("chat." + channel.name);
         }
     },
-    "off": async (target, chatter, message) => {
-        if (chatter.subscribedTo("chat." + target)) {
-            chatter.unsubscribe("chat." + target);
+    "off": async (args, chatter, line) => {
+        let channel=args[0];
+        if (chatter.subscribedTo("chat." + channel.name)) {
+            chatter.unsubscribe("chat." + channel.name);
         } else {
-            PubSub.publish("system." + chatter.id, "Already disconnected from `" + target + "`.");
+            PubSub.publish("system." + chatter.id, "Already disconnected from `" + channel.name + "`.");
         }
     },
-    "say": async (target, chatter, message) => {
-        if (chatter.subscribedTo("chat." + target)) {
-            PubSub.publish("chat." + target, chatter.nickname + " says, \"" + say_string + "\".");
+    "say": async (args, chatter, line) => {
+        let channel=args[0];
+        let message=args[1];
+        if (chatter.subscribedTo("chat." + channel.name)) {
+
+            PubSub.publish("chat." + channel.name, chatter.nickname + " says, \"" + message + "\".");
         } else {
-            PubSub.publish("system." + chatter.id, "Not connected to `" + target + "`. Connect with `@channel/on`.");
+            PubSub.publish("system." + chatter.id, "Not connected to `" + channel.name + "`. Connect with `@channel/on`.");
         }
     },
-    "list": async (target, chatter, message) => {
+    "list": async (args, chatter, line) => {
         let channels = await db.getChannelList();
         if(channels.length > 0){
             let channel_list = channels.reduce((list, channel) => list+"\r\n Name: "+channel.name+", Type: "+channel.type, "Channels: ");
@@ -62,14 +67,14 @@ module.exports.handlers = {
         }
     },
 };
-module.exports.handle = async function (handler, target, chatter, message) {
-    if (requires["channel_name"].includes(handler)) {
-        let channel_name = await db.getChannel(target);
-        if (channel_name) {
-            target = channel_name;
+module.exports.handle = async function (handler, args, chatter, line) {
+    if (requires["channel"].includes(handler)) {
+        let channel= await db.getChannel(args[0]);
+        if (channel) {
+            args[0] = channel;
         } else {
-            throw new Error("Could not find a channel that contains `" + target + "`.");
+            throw new Error("Could not find a channel that contains `" + args[0] + "`.");
         }
     }
-    await module.exports.handlers[handler](target, chatter, message);
+    await module.exports.handlers[handler](args, chatter, line);
 };

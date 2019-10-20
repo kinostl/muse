@@ -12,20 +12,18 @@ const handlers = {
     //"account": require('./handlers/AccountHandler'),
 }
 
-module.exports = async function (chatter, message) {
-    let [command, target] = message.trim().split(" ", 2);
-    let args = command.slice(1).split("/");
+module.exports = async function (chatter, line) {
+    let args = line.trim().split(" ", 2);
+    let [command, handler] = args[0].slice(1).split("/").map((o)=>o.trim());
     try{
-        command = args[0];
-        let handler = args[1];
-        let _commands = Object.keys(handlers).filter((o)=>o.includes(command));
-        if(!_commands){
+        let commands = Object.keys(handlers).filter((o)=>o.includes(command));
+        if(!commands){
             throw new Error("`"+command+"` is not an option.");
         }
-        if(_commands.length > 1){
-            throw new Error("`"+command+"` is ambiguous. Please specify from these options: "+_commands.join(","));
+        if(commands.length > 1){
+            throw new Error("`"+command+"` is ambiguous. Please specify from these options: "+commands.join(","));
         }
-        command = _commands[0];
+        command = commands[0];
 
         let _handlers = Object.keys(handlers[command]).filter((o)=>o.includes(handler));
         if(!_handlers){
@@ -34,8 +32,8 @@ module.exports = async function (chatter, message) {
         if(_handlers.length > 1){
             throw new Error("`"+handler+"` is ambiguous. Please specify from these options: "+_handlers.join(","));
         }
-        args.splice(0, 1);
-        await handlers[command].handle(handler, target, chatter, message);
+        args = args[1] && args[1].split("=", 2).map((o) => o.trim());
+        await handlers[command].handle(handler, args, chatter, line);
     }catch(e){
         debug('muse:core.error')(e);
         PubSub.publish("system." + chatter.id, e.message);

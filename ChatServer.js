@@ -56,11 +56,11 @@ ChatServer.prototype.handleUnsubscribe = function(chatter, channel){
 	}
 }
 
-ChatServer.prototype.handleChat = function(chatter, message) {
-	if(message.startsWith(this.command_prefix)){
-		CommandHandler(chatter, message)
+ChatServer.prototype.handleChat = function(chatter, line) {
+	if(line.startsWith(this.command_prefix)){
+		CommandHandler(chatter, line)
 	}else{
-		PubSub.publish("system." + chatter.id, "`"+message+"` isn't an option.");
+		PubSub.publish("system." + chatter.id, "`"+line+"` isn't an option.");
 	}
 };
 

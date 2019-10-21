@@ -66,6 +66,10 @@ module.exports.handlers = {
             PubSub.publish("system." + chatter.id, "No Channels.");
         }
     },
+    "add": async (args, chatter, line) => {
+        await db.addChannel(args[0],'ooc');
+        PubSub.publish("system." + chatter.id, "Added "+args[0]+" to channels.");
+    },
 };
 module.exports.handle = async function (handler, args, chatter, line) {
     if (requires["channel"].includes(handler)) {

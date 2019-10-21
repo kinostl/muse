@@ -43,7 +43,7 @@ ChatServer.prototype.handleLine = function(chatter, line) {
 	if(line.startsWith(this.command_prefix)){
 		CommandHandler(chatter, line)
 	}else{
-		PubSub.publish("system." + chatter.id, "`"+line+"` isn't an option.");
+		PubSub.publish("system." + chatter.id, "`"+line+"` isn't an option. See available commands with `@help`");
 	}
 };
 

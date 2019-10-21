@@ -15,9 +15,9 @@ function Chatter(socket, server) {
 
 	this.socket     = socket;
 	this.server     = server;
-	this.nickname   = "whatever";
 	this.lineBuffer = new SocketLineBuffer(socket);
 	this.id         = server.ids;
+	this.nickname   = "guest"+this.id;
 	this.channels   = {};
 
 	this.lineBuffer.on("line", this.handleLine.bind(this));
@@ -33,11 +33,9 @@ Chatter.prototype.send = function(message, data) {
 		let header = message[1];
 		output = "<"+header+"> "+data + "\r\n";
 	}
-	else if(message[0] === "system"){
+	if(message[0] === "system"){
 		let header = message[0];
 		output = "[" + header + "] " + data + "\r\n";
-	}else{
-		debug("muse:core.error")("Attempted to send non-chat, non-system info to Chatter.\r\n"+"Message: "+message+"\r\nData: "+data);
 	}
 	if(output){
 		this.socket.write(output);
@@ -49,7 +47,10 @@ Chatter.prototype.send = function(message, data) {
 		) {
 			debug("muse:core.output." + this.id + " (" + this.nickname + ")")(output);
 		}
+	}else{
+		debug("muse:core.error")("Attempted to send non-chat, non-system info to Chatter.\r\n"+"Message: "+message+"\r\nData: "+data);
 	}
+
 };
 
 Chatter.prototype.subscribedTo = function(channel){

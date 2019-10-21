@@ -1,5 +1,6 @@
 const PubSub = require('pubsub-js');
 const db = require('../db');
+const {MuseError} = require('../errors');
 
 const requires = {
     "channel": ["on", "off", "say"],
@@ -13,6 +14,8 @@ const permissions = {
  * chan/as
  * chan/title
  * chan/recall
+ * chan/gag
+ * chan/ungag
  **/
 
 /***
@@ -37,7 +40,7 @@ module.exports.handlers = {
     "on": async (args, chatter, line) => {
         let channel=args[0];
         if (chatter.subscribedTo("chat." + channel.name)) {
-            PubSub.publish("system." + chatter.id, "Already connected to `" + channel.name + "`.");
+            throw new MuseError("Already connected to `" + channel.name + "`.");
         } else {
             chatter.subscribe("chat." + channel.name);
         }
@@ -47,17 +50,16 @@ module.exports.handlers = {
         if (chatter.subscribedTo("chat." + channel.name)) {
             chatter.unsubscribe("chat." + channel.name);
         } else {
-            PubSub.publish("system." + chatter.id, "Already disconnected from `" + channel.name + "`.");
+            throw new MuseError("Already disconnected from `" + channel.name + "`.");
         }
     },
     "say": async (args, chatter, line) => {
         let channel=args[0];
         let message=args[1];
         if (chatter.subscribedTo("chat." + channel.name)) {
-
             PubSub.publish("chat." + channel.name, chatter.nickname + " says, \"" + message + "\".");
         } else {
-            PubSub.publish("system." + chatter.id, "Not connected to `" + channel.name + "`. Connect with `@channel/on`.");
+            throw new MuseError("Not connected to `" + channel.name + "`. Connect with `@channel/on`.");
         }
     },
     "list": async (args, chatter, line) => {
@@ -66,7 +68,7 @@ module.exports.handlers = {
             let channel_list = channels.reduce((list, channel) => list+"\r\n Name: "+channel.name+", Type: "+channel.type, "Channels: ");
             PubSub.publish("system." + chatter.id, channel_list);
         }else{
-            PubSub.publish("system." + chatter.id, "No Channels.");
+            throw new MuseError("No Channels.");
         }
     },
     "add": async (args, chatter, line) => {
@@ -80,7 +82,7 @@ module.exports.handle = async function (handler, args, chatter, line) {
         if (channel) {
             args[0] = channel;
         } else {
-            throw new Error("Could not find a channel that contains `" + args[0] + "`.");
+            throw new MuseError("Could not find a channel that contains `" + args[0] + "`.");
         }
     }
     await module.exports.handlers[handler](args, chatter, line);

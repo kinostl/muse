@@ -4,7 +4,14 @@ exports.up = function(knex) {
 			table.increments('id');
 			table.string('name', 255).notNullable();
 			table.string('type', 255).notNullable();
-		}).then(()=>knex('channels').insert({
+		})
+		.createTable('accounts', function (table) {
+			table.increments('id');
+			table.string('name', 255).notNullable();
+			table.string('password', 255).notNullable();
+			table.jsonb('attributes');
+		})
+		.then(()=>knex('channels').insert({
 			'name':'general',
 			'type':'ooc',
 		}));

@@ -6,14 +6,10 @@ const requires = {
 };
 
 const permissions = {
-    "admin": ["add", "delete", "type"]
+    "admin": ["add", "delete", "type", "name"]
 };
 
 /**
- * chan/on
- * chan/off
- * chan/list
- * chan/say
  * chan/as
  * chan/title
  * chan/recall
@@ -24,12 +20,19 @@ const permissions = {
  ***/
 
 /**
- * chan/add
  * chan/delete
  * chan/type
+ * chan/name
  **/
 
 module.exports = {}
+module.exports.help={
+    "on":"Join a channel",
+    "off":"Leave a channel",
+    "list":"See available channels",
+    "say":"Send message to channel",
+    "add":"Create a new channel",
+}
 module.exports.handlers = {
     "on": async (args, chatter, line) => {
         let channel=args[0];

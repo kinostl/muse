@@ -18,14 +18,6 @@ function ChatServer(config) {
 	this.command_prefix=config.command_prefix;
 }
 
-ChatServer.prototype.isNicknameLegal = function(nickname) {
-	// A nickname may contain letters or numbers only,
-	if(nickname.replace(/[A-Za-z0-9]*/, '') != "") {
-		return false
-	}
-	return true;
-};
-
 ChatServer.prototype.handleConnection = function(connection) {
 	debug("muse:core")("Incoming connection from " + connection.remoteAddress);
 	connection.setEncoding("utf8");
@@ -34,29 +26,20 @@ ChatServer.prototype.handleConnection = function(connection) {
 	this.ids++;
 	chatter.subscribe("system."+chatter.id);
 	PubSub.publish("system."+chatter.id, "Welcome! What is your nickname?");
-	chatter.on("chat", this.handleChat.bind(this));
+	chatter.on("line", this.handleLine.bind(this));
 	chatter.on("join", this.handleJoin.bind(this));
 	chatter.on("leave", this.handleLeave.bind(this));
-	chatter.on("subscribe", this.handleSubscribe.bind(this));
-	chatter.on("unsubscribe", this.handleUnsubscribe.bind(this));
 };
 
-ChatServer.prototype.handleSubscribe = function(chatter, channel){
-	if(!this.debug_sockets[channel]){
-		this.debug_sockets[channel] = PubSub.subscribe(channel,function(message, data){
-			debug("muse:"+message)(data);
-		});
+ChatServer.prototype.handleLine = function(chatter, line) {
+	if (
+		process.env.NODE_ENV === "testing" ||
+		process.env.NODE_ENV === "debug" ||
+		process.env.CREEPER === true
+		//Or user is flagged for logging
+	) {
+		debug("muse:core.input." + chatter.id + " (" + chatter.nickname + ")")(line);
 	}
-}
-
-ChatServer.prototype.handleUnsubscribe = function(chatter, channel){
-	if(channel.split().length > 2){
-		PubSub.unsubscribe(this.debug_sockets[channel]);
-		delete this.debug_sockets[channel]
-	}
-}
-
-ChatServer.prototype.handleChat = function(chatter, line) {
 	if(line.startsWith(this.command_prefix)){
 		CommandHandler(chatter, line)
 	}else{

@@ -7,8 +7,6 @@ const handlers = {
     "channel": require('./handlers/ChannelHandler'),
     //"mail": require('./handlers/MailHandler'),
     //"article": require('./handlers/ArticleHandler'),
-    //"player": require('./handlers/PlayerHandler'),
-    //"profile": require('./handlers/ProfileHandler'),
     //"account": require('./handlers/AccountHandler'),
 }
 
@@ -72,17 +70,15 @@ module.exports = async function (chatter, line) {
      ****/
 
     /**
-     * player/block
-     * player/unblock
-     * player/ignore
-     * player/unignore
-     **/
-
-
-    /**
-     * profile/create
-     * profile/delete
-     * profile/rename
+     * account/login
+     * account/logout
+     * account/create
+     * account/delete
+     * account/rename
+     * account/block
+     * account/unblock
+     * account/ignore
+     * account/unignore
      **/
 
     /***

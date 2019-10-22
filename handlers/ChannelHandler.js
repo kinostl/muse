@@ -57,7 +57,7 @@ module.exports.handlers = {
         let channel=args[0];
         let message=args[1];
         if (chatter.subscribedTo("chat." + channel.name)) {
-            PubSub.publish("chat." + channel.name, chatter.nickname + " says, \"" + message + "\".");
+            PubSub.publish("chat." + channel.name, chatter.id + " says, \"" + message + "\".");
         } else {
             throw new MuseError("Not connected to `" + channel.name + "`. Connect with `@channel/on`.");
         }

@@ -1,6 +1,5 @@
 const PORT = 1212;
 const HOST = "localhost";
-const COMMAND_PREFIX = "@";
 
 const debug = require('debug');
 const db = require('./db');
@@ -14,16 +13,15 @@ db.knex.migrate.latest()
 	.then((rows) => rows.map((row) => PubSub.subscribe("chat." + row.name, (message, data) => {
 		debug("muse:"+message)(data);
 	})))
-	.then((subscriptions) => {
+	.then((channels) => {
 		// Start the server!
 		server = new ChatServer({
-			"command_prefix": COMMAND_PREFIX,
 			"port": PORT,
 			"host": HOST
 		});
 
 		debug("muse:core")("Started on " + HOST + " " + PORT);
-		debug("muse:core")("Subscribed to "+subscriptions.length+" channels.");
+		debug("muse:core")("Subscribed to "+channels.length+" channels.");
 	}).catch((e) => {
 		debug("muse:core.error")(e);
 	});

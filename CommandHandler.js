@@ -36,8 +36,9 @@ module.exports = async function (chatter, line) {
     }catch(e){
         if(e instanceof MuseError){
             PubSub.publish("system." + chatter.id, e.message);
+        }else{
+            debug('muse:core.error')(e);
         }
-        debug('muse:core.error')(e);
     }
 
     /**

@@ -1,11 +1,3 @@
-class DatabaseError extends Error {
-    constructor(params) {
-        super(params);
-        this.name = this.constructor.name;
-        Error.captureStackTrace(this, this.constructor);
-    }
-}
-
 class MuseError extends Error {
     constructor(params) {
         super(params);
@@ -15,6 +7,5 @@ class MuseError extends Error {
 }
 
 module.exports = {
-    DatabaseError,
     MuseError,
 }

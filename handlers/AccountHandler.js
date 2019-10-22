@@ -1,5 +1,5 @@
 const db = require('../db');
-const {DatabaseError, MuseError} = require('../errors');
+const PubSub = require('pubsub-js');
 /***
 * Player Account Functions
 ****/
@@ -14,6 +14,8 @@ const {DatabaseError, MuseError} = require('../errors');
  * account/unblock
  * account/ignore
  * account/unignore
+ * account/add_role
+ * account/remove_role
  **/
 
 /***
@@ -21,25 +23,22 @@ const {DatabaseError, MuseError} = require('../errors');
  ***/
 
 /**
- * account/add_role
- * account/remove_role
  * account/ban
  * account/unban
  **/
 
 module.exports = {};
 module.exports.handlers = {
+    "login": async function(args, chatter, line){
+        let [name, password] = args;
+        await chatter.login(name, password);
+        PubSub.publish("system." + chatter.id, "Logged in. Welcome, " + chatter.id +".");
+
+    },
     "create": async function (args, chatter, line) {
         let [name, password] = args;
-        try{
-            await db.addAccount(name, password);
-        }catch(e){
-            if(e instanceof DatabaseError){
-                throw new MuseError("The name `" + name + "` is already taken.");
-            }else{
-                throw e;
-            }
-        }
+        await db.addAccount(name, password);
+        await module.exports.handlers.login([name, password],chatter, line);
     }
 };
 module.exports.handle = async function (handler, args, chatter, line) {

@@ -4,6 +4,7 @@ exports.up = function(knex) {
 			table.increments('id');
 			table.string('name', 255).notNullable();
 			table.string('type', 255).notNullable();
+			table.bool('isDefault').notNullable().defaultTo(false);
 			table.unique('name');
 		})
 		.createTable('accounts', function (table) {
@@ -23,11 +24,12 @@ exports.up = function(knex) {
 				'on',
 				'off',
 				'gagged'
-			]).notNullable().defaultTo('off');
+			]).notNullable().defaultTo('on');
 		})
 		.then(()=>knex('channels').insert({
 			'name':'general',
 			'type':'ooc',
+			'isDefault':true
 		}));
 };
 

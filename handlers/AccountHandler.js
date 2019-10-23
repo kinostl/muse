@@ -28,6 +28,10 @@ const PubSub = require('pubsub-js');
  **/
 
 module.exports = {};
+module.exports.help={
+    "login":"Log into your account.",
+    "create":"Create your account.",
+};
 module.exports.handlers = {
     "login": async function(args, chatter, line){
         let [name, password] = args;

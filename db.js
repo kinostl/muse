@@ -24,6 +24,31 @@ db.login = async (name, password) => {
     return account;
 };
 
+db.setSubStatus = async(account, channel, status)=>{
+    let query={
+        'accounts_id':account.id,
+        'channels_id':channel.id,
+    }
+    let existingSubQuery = db.knex('subscriptions').where(query);
+    let existingSub = await existingSubQuery.first();
+    if(existingSub){
+        await existingSubQuery.update({
+            status:status
+        });
+    }else{
+        query.status=status;
+        await db('subscriptions').insert(query);
+    }
+};
+
+db.subscribe = async (account, channel) => {
+    await db.setSubStatus(account, channel, 'on');
+};
+
+db.unsubscribe = async (account, channel) => {
+    await db.setSubStatus(account, channel, 'off');
+};
+
 db.getSubscriptions = async (account) => {
     await db.knex('subscriptions').where({
         'accounts_id':account.id,
@@ -33,10 +58,23 @@ db.getSubscriptions = async (account) => {
         'accounts_id':account.id,
         'status':'on'
     })
-    .join('channels',{'subscriptions.channels_id':'channels.id'})
+    .join('channels',{'subscriptions.channels_id':'channels.id'}) //TODO I dont know how joins work and this probably am a problem
     .select();
     return channels;
-}
+};
+
+db.getDefaultChannels = async () => {
+    return await db.knex('channels').where({isDefault:true}).select();
+};
+
+db.setDefaultSubs = async (account) => {
+    let defaultChannels = await db.getDefaultChannels();
+    let defaultSubs = defaultChannels.map((channel)=>({
+        accounts_id: account.id,
+        channels_id: channel.id
+    }));
+    await db.knex('subscriptions').insert(defaultSubs);
+};
 
 db.addAccount = async (name, password) => {
     password = await bcrypt.hash(password, 10);
@@ -47,12 +85,7 @@ db.addAccount = async (name, password) => {
         password: password,
     });
     let account=await db.knex('accounts').where({name:name}).first();
-    let defaultChannels=await db.knex('channels').where({isDefault:true}).select();
-    let defaultSubs = defaultChannels.map((channel)=>({
-        accounts_id: account.id,
-        channels_id: channel.id
-    }));
-    await db.knex('subscriptions').insert(defaultSubs);
+    await db.setDefaultSubs(account);
     return account;
 };
 

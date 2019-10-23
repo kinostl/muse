@@ -18,6 +18,7 @@ function ChatServer(config) {
 ChatServer.prototype.handleConnection = function(connection) {
 	debug("muse:core")("Incoming connection from " + connection.remoteAddress);
 	connection.setEncoding("utf8");
+	connection.setKeepAlive(true);
 
 	let guestId=Object.keys(this.guests).length;
 	let chatter = new Chatter(connection, guestId);

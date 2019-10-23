@@ -39,39 +39,30 @@ module.exports.help={
 module.exports.handlers = {
     "on": async (args, chatter, line) => {
         let channel=args[0];
-        if (chatter.subscribedTo("chat." + channel.name)) {
-            throw new MuseError("Already connected to `" + channel.name + "`.");
-        } else {
-            chatter.subscribe("chat." + channel.name);
-        }
+        if (chatter.subscribedTo("chat." + channel.name)) throw new MuseError("Already connected to `" + channel.name + "`.");
+        if (chatter.account) await db.subscribe(chatter.account, channel);
+        chatter.subscribe("chat." + channel.name);
     },
     "off": async (args, chatter, line) => {
         let channel=args[0];
-        if (chatter.subscribedTo("chat." + channel.name)) {
-            chatter.unsubscribe("chat." + channel.name);
-        } else {
-            throw new MuseError("Already disconnected from `" + channel.name + "`.");
-        }
+        if (!chatter.subscribedTo("chat." + channel.name)) throw new MuseError("Already disconnected from `" + channel.name + "`.");
+        if (chatter.account) await db.unsubscribe(chatter.account, channel);
+        chatter.unsubscribe("chat." + channel.name);
     },
     "say": async (args, chatter, line) => {
         let channel=args[0];
         let message=args[1];
-        if (chatter.subscribedTo("chat." + channel.name)) {
-            PubSub.publish("chat." + channel.name, chatter.id + " says, \"" + message + "\".");
-        } else {
-            throw new MuseError("Not connected to `" + channel.name + "`. Connect with `@channel/on`.");
-        }
+        if (!chatter.subscribedTo("chat." + channel.name)) throw new MuseError("Not connected to `" + channel.name + "`. Connect with `@channel/on`.");
+        PubSub.publish("chat." + channel.name, chatter.id + " says, \"" + message + "\".");
     },
     "list": async (args, chatter, line) => {
         let channels = await db.getChannelList();
-        if(channels.length > 0){
-            let channel_list = channels.reduce((list, channel) => list+"\r\n Name: "+channel.name+", Type: "+channel.type, "Channels: ");
-            PubSub.publish("system." + chatter.id, channel_list);
-        }else{
-            throw new MuseError("No Channels.");
-        }
+        if(channels.length < 1) throw new MuseError("No Channels.");
+        let channel_list = channels.reduce((list, channel) => list + "\r\n Name: " + channel.name + ", Type: " + channel.type, "Channels: ");
+        PubSub.publish("system." + chatter.id, channel_list);
     },
     "add": async (args, chatter, line) => {
+        //TODO rework this to get ooc from command
         await db.addChannel(args[0],'ooc');
         PubSub.publish("system." + chatter.id, "Added "+args[0]+" to channels.");
     },

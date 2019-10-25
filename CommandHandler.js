@@ -24,7 +24,7 @@ module.exports = async function (chatter, line) {
         if(!_handlers) throw new MuseError("`"+handler+"` is not an option.");
         if(_handlers.length > 1) throw new MuseError("`"+handler+"` is ambiguous. Please specify from these options: "+_handlers.join(","));
         args = args[1] && args[1].split("=", 2).map((o) => o.trim());
-        await handlers[command].handle(handler, args, chatter, line);
+        handlers[command].handle(handler, args, chatter, line);
     }catch(e){
         if(e instanceof MuseError){
             PubSub.publish("system." + chatter.id, e.message);

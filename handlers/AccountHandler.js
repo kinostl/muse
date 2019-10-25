@@ -42,9 +42,9 @@ module.exports.handlers = {
     "create": async function (args, chatter, line) {
         let [name, password] = args;
         await db.addAccount(name, password);
-        await module.exports.handlers.login([name, password],chatter, line);
+        module.exports.handlers.login([name, password],chatter, line);
     }
 };
 module.exports.handle = async function (handler, args, chatter, line) {
-    await module.exports.handlers[handler](args, chatter, line);
+    module.exports.handlers[handler](args, chatter, line);
 };

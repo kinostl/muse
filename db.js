@@ -5,13 +5,13 @@ const {MuseError} = require('./errors');
 
 const db = {}
 db.knex = knex;
-db.getChannel = async (name) => await db.knex('channels').where('name', 'like', `%${name}%`).first();
-db.getChannelList = async () => await db.knex('channels').select();
-db.addChannel = async (name, type) => await db.knex('channels').insert({
+db.getChannel = async (name) => db.knex('channels').where('name', 'like', `%${name}%`).first();
+db.getChannelList = async () => db.knex('channels').select();
+db.addChannel = async (name, type) => db.knex('channels').insert({
     name: name,
     type: type
 });
-db.setChannelType = async (name, type) => await db.knex('channels')
+db.setChannelType = async (name, type) => db.knex('channels')
     .where('name', name)
     .update({ type: type });
 
@@ -32,21 +32,21 @@ db.setSubStatus = async(account, channel, status)=>{
     let existingSubQuery = db.knex('subscriptions').where(query);
     let existingSub = await existingSubQuery.first();
     if(existingSub){
-        await existingSubQuery.update({
+        existingSubQuery.update({
             status:status
         });
     }else{
         query.status=status;
-        await db('subscriptions').insert(query);
+        db('subscriptions').insert(query);
     }
 };
 
 db.subscribe = async (account, channel) => {
-    await db.setSubStatus(account, channel, 'on');
+    db.setSubStatus(account, channel, 'on');
 };
 
 db.unsubscribe = async (account, channel) => {
-    await db.setSubStatus(account, channel, 'off');
+    db.setSubStatus(account, channel, 'off');
 };
 
 db.getSubscriptions = async (account) => {
@@ -54,13 +54,12 @@ db.getSubscriptions = async (account) => {
         'accounts_id':account.id,
         'status':'gagged'
     }).update({status:'on'});
-    let channels = await db.knex('subscriptions').where({
+    return db.knex('subscriptions').where({
         'accounts_id':account.id,
         'status':'on'
     })
     .join('channels',{'subscriptions.channels_id':'channels.id'}) //TODO I dont know how joins work and this probably am a problem
     .select();
-    return channels;
 };
 
 db.getDefaultChannels = async () => {
@@ -73,7 +72,7 @@ db.setDefaultSubs = async (account) => {
         accounts_id: account.id,
         channels_id: channel.id
     }));
-    await db.knex('subscriptions').insert(defaultSubs);
+    db.knex('subscriptions').insert(defaultSubs);
 };
 
 db.addAccount = async (name, password) => {

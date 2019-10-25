@@ -40,13 +40,13 @@ module.exports.handlers = {
     "on": async (args, chatter, line) => {
         let channel=args[0];
         if (chatter.subscribedTo("chat." + channel.name)) throw new MuseError("Already connected to `" + channel.name + "`.");
-        if (chatter.account) await db.subscribe(chatter.account, channel);
+        if (chatter.account) db.subscribe(chatter.account, channel);
         chatter.subscribe("chat." + channel.name);
     },
     "off": async (args, chatter, line) => {
         let channel=args[0];
         if (!chatter.subscribedTo("chat." + channel.name)) throw new MuseError("Already disconnected from `" + channel.name + "`.");
-        if (chatter.account) await db.unsubscribe(chatter.account, channel);
+        if (chatter.account) db.unsubscribe(chatter.account, channel);
         chatter.unsubscribe("chat." + channel.name);
     },
     "say": async (args, chatter, line) => {
@@ -63,7 +63,7 @@ module.exports.handlers = {
     },
     "add": async (args, chatter, line) => {
         //TODO rework this to get ooc from command
-        await db.addChannel(args[0],'ooc');
+        db.addChannel(args[0],'ooc');
         PubSub.publish("system." + chatter.id, "Added "+args[0]+" to channels.");
     },
 };
@@ -76,5 +76,5 @@ module.exports.handle = async function (handler, args, chatter, line) {
             throw new MuseError("Could not find a channel that contains `" + args[0] + "`.");
         }
     }
-    await module.exports.handlers[handler](args, chatter, line);
+    module.exports.handlers[handler](args, chatter, line);
 };

@@ -14,6 +14,19 @@ exports.up = function(knex) {
 			table.jsonb('attributes');
 			table.unique('name');
 		})
+		.createTable('articles', function (table) {
+			table.increments('id');
+			table.integer('accounts_id').notNullable();
+			table.enu('type', [
+				'reference', //Anything else. Things, profiles, reference characters
+				'character', //Playable
+				'location', //Spawnable for Story
+				'event', //Timeline
+			]).notNullable().defaultTo("reference");
+			table.string('title', 255).notNullable();
+			table.string('summary', 255);
+			table.text('description').notNullable();
+		})
 		.createTable('subscriptions', function (table) {
 			table.increments('id');
 			table.integer('accounts_id').notNullable();

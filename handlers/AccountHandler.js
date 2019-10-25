@@ -46,5 +46,5 @@ module.exports.handlers = {
     }
 };
 module.exports.handle = async function (handler, args, chatter, line) {
-    module.exports.handlers[handler](args, chatter, line);
+    return module.exports.handlers[handler](args, chatter, line);
 };

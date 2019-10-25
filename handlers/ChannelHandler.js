@@ -76,5 +76,5 @@ module.exports.handle = async function (handler, args, chatter, line) {
             throw new MuseError("Could not find a channel that contains `" + args[0] + "`.");
         }
     }
-    module.exports.handlers[handler](args, chatter, line);
+    return module.exports.handlers[handler](args, chatter, line);
 };

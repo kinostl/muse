@@ -5,6 +5,8 @@ const {MuseError} = require('./errors');
 
 const db = {}
 db.knex = knex;
+
+//Channels
 db.getChannel = async (name) => db.knex('channels').where('name', 'like', `%${name}%`).first();
 db.getChannelList = async () => db.knex('channels').select();
 db.addChannel = async (name, type) => db.knex('channels').insert({
@@ -15,6 +17,9 @@ db.setChannelType = async (name, type) => db.knex('channels')
     .where('name', name)
     .update({ type: type });
 
+db.getDefaultChannels = async () => db.knex('channels').where({isDefault:true}).select();
+
+//Accounts
 db.login = async (name, password) => {
     let account = await db.knex('accounts').where('name', name).first();
     if (!account) throw new MuseError("Account not found.");
@@ -32,22 +37,17 @@ db.setSubStatus = async(account, channel, status)=>{
     let existingSubQuery = db.knex('subscriptions').where(query);
     let existingSub = await existingSubQuery.first();
     if(existingSub){
-        existingSubQuery.update({
+        return existingSubQuery.update({
             status:status
         });
     }else{
         query.status=status;
-        db('subscriptions').insert(query);
+        return db('subscriptions').insert(query);
     }
 };
 
-db.subscribe = async (account, channel) => {
-    db.setSubStatus(account, channel, 'on');
-};
-
-db.unsubscribe = async (account, channel) => {
-    db.setSubStatus(account, channel, 'off');
-};
+db.subscribe = async (account, channel) => db.setSubStatus(account, channel, 'on');
+db.unsubscribe = async (account, channel) => db.setSubStatus(account, channel, 'off');
 
 db.getSubscriptions = async (account) => {
     await db.knex('subscriptions').where({
@@ -62,9 +62,6 @@ db.getSubscriptions = async (account) => {
     .select();
 };
 
-db.getDefaultChannels = async () => {
-    return await db.knex('channels').where({isDefault:true}).select();
-};
 
 db.setDefaultSubs = async (account) => {
     let defaultChannels = await db.getDefaultChannels();
@@ -72,7 +69,7 @@ db.setDefaultSubs = async (account) => {
         accounts_id: account.id,
         channels_id: channel.id
     }));
-    db.knex('subscriptions').insert(defaultSubs);
+    return db.knex('subscriptions').insert(defaultSubs);
 };
 
 db.addAccount = async (name, password) => {
@@ -87,5 +84,13 @@ db.addAccount = async (name, password) => {
     await db.setDefaultSubs(account);
     return account;
 };
+
+//Articles
+
+db.addArticle = async (account, title, description) => db.knex('articles').insert({
+    accounts_id: account.id,
+    description: description,
+    title: title
+});
 
 module.exports = db;

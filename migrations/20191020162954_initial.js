@@ -25,7 +25,7 @@ exports.up = function(knex) {
 			]).notNullable().defaultTo("reference");
 			table.string('title', 255).notNullable();
 			table.string('summary', 255);
-			table.text('description').notNullable();
+			table.text('content').notNullable();
 		})
 		.createTable('subscriptions', function (table) {
 			table.increments('id');

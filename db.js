@@ -87,10 +87,13 @@ db.addAccount = async (name, password) => {
 
 //Articles
 
-db.addArticle = async (account, title, description) => db.knex('articles').insert({
+db.addArticle = async (account, title, content) => db.knex('articles').insert({
     accounts_id: account.id,
-    description: description,
+    content: content,
     title: title
 });
+
+db.getArticleList = async () => db.knex('articles').select().limit(10);
+db.getArticle = async (id) => db.knex('articles').where({id:id}).first();
 
 module.exports = db;

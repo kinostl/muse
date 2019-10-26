@@ -52,7 +52,7 @@ module.exports.handlers = {
     },
     "list": async function (args, chatter, line) {
         let articles = await db.getArticleList();
-        articles = articles.reduce((print, article)=>print+"\r\n#"+article.id+"\tTitle: "+article.title+"\r\n "+(article.summary?article.summary:article.content).substring(0,70)+"...","==Latest Articles==");
+        articles = articles.reduce((print, article)=>print+"\r\n#"+article.id+"\tTitle: "+article.title+"\r\n "+(article.summary?article.summary:article.content.substring(0,70)+"..."),"==Latest Articles==");
         PubSub.publish("system." + chatter.id, articles);
     },
     "type": async function (args, chatter, line) {

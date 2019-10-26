@@ -1,15 +1,7 @@
 const PubSub = require('pubsub-js');
 const debug = require('debug');
 const {MuseError} = require('./errors');
-
-const handlers = {
-    //"help": require('./handlers/HelpHandler'),
-    //"story": require('./handlers/StoryHandler'),
-    "channel": require('./handlers/ChannelHandler'),
-    //"mail": require('./handlers/MailHandler'),
-    "article": require('./handlers/ArticleHandler'),
-    "account": require('./handlers/AccountHandler'),
-}
+const handlers = require('./handlers');
 
 module.exports = async function (chatter, line) {
     let args = line.trim().split(" ", 2);
@@ -36,15 +28,6 @@ module.exports = async function (chatter, line) {
     /**
      * help
      **/
-
-    /**
-     * story/start
-     * story/end
-     * story/title
-     * story/summary
-     * story/invite
-     **/
-
 
     /**
      * mail/send

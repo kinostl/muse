@@ -24,7 +24,7 @@ exports.up = function(knex) {
 				'event', //Timeline
 			]).notNullable().defaultTo("reference");
 			table.string('title', 255).notNullable();
-			table.string('summary', 255);
+			table.string('summary', 140);
 			table.text('content').notNullable();
 		})
 		.createTable('subscriptions', function (table) {

@@ -111,4 +111,30 @@ db.addLog = async (content, account, channel, character, location, chapter) => {
     return db.knex('logs').insert(logData);
 }
 
+// Chapters
+
+db.addChapter = async (account, title) {
+    //create discussion channel
+    let discussion = db.addChannel(title+" discussion",'discussion');
+    //create chapter channel
+    let chapter = db.addChannel(title,'chapter');
+
+    //create chapter
+    await chapter;
+    let channel = await db.knex('channels').where({
+        name: name,
+        type: 'chapter'
+    }).last();
+    await db.knex('chapters').insert({
+        accounts_id: account.id,
+        channels_id: channel.id,
+        title: title,
+    });
+
+    //setup subscriptions
+    await discussion;
+    await db.subscribe(account, title);
+    await db.subscribe(account, title+" discussion");
+}
+
 module.exports = db;

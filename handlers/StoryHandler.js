@@ -29,13 +29,13 @@ const requires = {
 
 module.exports = {};
 module.exports.help={
-    "start":"Start a new story. Creates a story and discussion channel.",
+    "start":"Start a new chapter. Creates a chapter and discussion channel.",
 };
 module.exports.handlers = {
     "start": async function (args, chatter, line) {
-        let [title, content] = args;
-        db.addArticle(chatter.account, title, content);
-        PubSub.publish("system." + chatter.id, "Added `"+title+"` to the article database.");
+        let [title] = args;
+        db.addChapter(chatter.account, title);
+        PubSub.publish("system." + chatter.id, "Prepared for the chapter `"+title+"`.");
     },
 };
 module.exports.handle = async function (handler, args, chatter, line) {

@@ -2,9 +2,9 @@
 
 This is a telnet server meant for users to connect to using MUSH clients such as Potato Mush Client, MUSHClient, and Tintin++. Its purpose is to facilitate creating stories between a community of people who share interest in a genre and setting. These are some of the commands it provides to fulfill that purpose.
 
-## @story
+## @chapter
 
-- **@story/start** Start a new story. Creates a story and discussion channel.
+- **@chapter/start** Start a new story. Creates a story and discussion channel.
 
 ## @channel
 

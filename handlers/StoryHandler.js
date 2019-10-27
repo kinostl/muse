@@ -32,7 +32,7 @@ module.exports.help={
     "start":"Start a new story. Creates a story and discussion channel.",
 };
 module.exports.handlers = {
-    "create": async function (args, chatter, line) {
+    "start": async function (args, chatter, line) {
         let [title, content] = args;
         db.addArticle(chatter.account, title, content);
         PubSub.publish("system." + chatter.id, "Added `"+title+"` to the article database.");

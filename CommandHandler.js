@@ -1,7 +1,7 @@
 const PubSub = require('pubsub-js');
 const debug = require('debug');
 const {MuseError} = require('./errors');
-const handlers = require('./handlers');
+const handlers = require('./Handlers');
 
 module.exports = async function (chatter, line) {
     let args = line.trim().split(" ", 2);

@@ -3,9 +3,22 @@ exports.up = function(knex) {
 		.createTable('channels', function (table) {
 			table.increments('id');
 			table.string('name', 255).notNullable();
-			table.string('type', 255).notNullable();
+			table.enu('type', [
+				'chat', //Out of Character
+				'green', //Partial In Character
+				'stage', //In Character
+				'chapter', //Chapter Specific In Character
+				'discussion' //Chapter or Article Discussion
+			]).notNullable().defaultTo('chat');
 			table.bool('isDefault').notNullable().defaultTo(false);
 			table.unique('name');
+		})
+		.createTable('chapters', (table)=>{
+			table.increments('id');
+			table.integer('accounts_id').notNullable();
+			table.integer('channels_id').notNullable();
+			table.string('title', 255).notNullable();
+			table.string('summary', 140);
 		})
 		.createTable('accounts', function (table) {
 			table.increments('id');
@@ -20,12 +33,23 @@ exports.up = function(knex) {
 			table.enu('type', [
 				'reference', //Anything else. Things, profiles, reference characters
 				'character', //Playable
-				'location', //Spawnable for Story
+				'location', //Spawnable for Chapter
 				'event', //Timeline
 			]).notNullable().defaultTo("reference");
 			table.string('title', 255).notNullable();
 			table.string('summary', 140);
 			table.text('content').notNullable();
+			table.jsonb('attributes');
+		})
+		.createTable('logs', (table)=>{
+			table.increments('id');
+			table.integer('accounts_id').notNullable();
+			table.integer('channels_id').notNullable();
+			table.integer('characters_id');
+			table.integer('chapters_id');
+			table.integer('locations_id');
+			table.text('content').notNullable();
+			table.timestamps();
 		})
 		.createTable('subscriptions', function (table) {
 			table.increments('id');
@@ -41,7 +65,7 @@ exports.up = function(knex) {
 		})
 		.then(()=>knex('channels').insert({
 			'name':'general',
-			'type':'ooc',
+			'type':'chat',
 			'isDefault':true
 		}));
 };

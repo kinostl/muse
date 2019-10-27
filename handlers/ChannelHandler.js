@@ -53,7 +53,9 @@ module.exports.handlers = {
         let channel=args[0];
         let message=args[1];
         if (!chatter.subscribedTo("chat." + channel.name)) throw new MuseError("Not connected to `" + channel.name + "`. Connect with `@channel/on`.");
-        PubSub.publish("chat." + channel.name, chatter.id + " says, \"" + message + "\".");
+        message = chatter.id + " says, \"" + message + "\".";
+        PubSub.publish("chat." + channel.name, message);
+        await db.addLog(message, chatter.account, channel);
     },
     "list": async (args, chatter, line) => {
         let channels = await db.getChannelList();

@@ -96,4 +96,19 @@ db.addArticle = async (account, title, content) => db.knex('articles').insert({
 db.getArticleList = async () => db.knex('articles').select().limit(10);
 db.getArticle = async (id) => db.knex('articles').where({id:id}).first();
 
+//Logs
+
+db.addLog = async (content, account, channel, character, location, chapter) => {
+    let logData = {
+        accounts_id: account.id,
+        channels_id: channel.id,
+        content: content,
+    };
+    if(chapter) logData.chapters_id = chapter.id;
+    if(character) logData.characters_id = character.id;
+    if(location) logData.locations_id = location.id;
+
+    return db.knex('logs').insert(logData);
+}
+
 module.exports = db;

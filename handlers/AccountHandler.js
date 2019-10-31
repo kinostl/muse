@@ -1,5 +1,4 @@
 const db = require('../db');
-const PubSub = require('pubsub-js');
 /***
 * Player Account Functions
 ****/
@@ -36,7 +35,7 @@ module.exports.handlers = {
     "login": async function(args, chatter, line){
         let [name, password] = args;
         await chatter.login(name, password);
-        PubSub.publish("system." + chatter.id, "Logged in. Welcome, " + chatter.id +".");
+        chatter.systemMessage("Logged in. Welcome, " + chatter.id +".");
 
     },
     "create": async function (args, chatter, line) {

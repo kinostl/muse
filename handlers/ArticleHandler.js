@@ -1,5 +1,4 @@
 const db = require('../db');
-const PubSub = require('pubsub-js');
 /***
 * Player Account Functions
 ****/
@@ -43,22 +42,22 @@ module.exports.handlers = {
         article = "==="+article.title+"===\r\n"+
         (article.summary?"\t("+article.summary+")\r\n":"")+
         "\t"+article.content;
-        PubSub.publish("system." + chatter.id, article);
+        chatter.systemMessage(article);
     },
     "create": async function (args, chatter, line) {
         let [title, content] = args;
         db.addArticle(chatter.account, title, content);
-        PubSub.publish("system." + chatter.id, "Added `"+title+"` to the article database.");
+        chatter.systemMessage("Added `"+title+"` to the article database.");
     },
     "list": async function (args, chatter, line) {
         let articles = await db.getArticleList();
         articles = articles.reduce((print, article)=>print+"\r\n#"+article.id+"\tTitle: "+article.title+"\r\n "+(article.summary?article.summary:article.content.substring(0,70)+"..."),"==Latest Articles==");
-        PubSub.publish("system." + chatter.id, articles);
+        chatter.systemMessage(articles);
     },
     "type": async function (args, chatter, line) {
         let [title, type] = args;
         db.setArticleType(chatter.account, title, type);
-        PubSub.publish("system." + chatter.id, "Changed `"+title+"` to be of type "+type+".");
+        chatter.systemMessage("Changed `"+title+"` to be of type "+type+".");
     },
 };
 module.exports.handle = async function (handler, args, chatter, line) {

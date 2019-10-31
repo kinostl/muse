@@ -1,5 +1,5 @@
 const db = require('../db');
-const PubSub = require('pubsub-js');
+const {MuseError} = require('../errors');
 /***
 * Player Account Functions
 ****/
@@ -34,18 +34,18 @@ module.exports.help={
 module.exports.handlers = {
     "start": async function (args, chatter, line) {
         let [title] = args;
-        db.addChapter(chatter.account, title);
-        PubSub.publish("system." + chatter.id, "Prepared for the chapter `"+title+"`.");
+        let {chapter, discussion} = await db.addChapter(chatter.account, title);
+        chatter.subscribe("chat."+chapter);
+        chatter.subscribe("chat."+discussion);
+        chatter.systemMessage("Prepared for the chapter `" + title + "`.");
     },
 };
 module.exports.handle = async function (handler, args, chatter, line) {
     [
-        "content",
-        "type",
-        "name"
+        "title",
     ].forEach((requirement) => {
         if (requires[requirement].includes(handler)) {
-            if (!args[1]) throw new MuseError("`" + handler + "` needs " + requirement + ".");
+            if (!args[0]) throw new MuseError("`" + handler + "` needs " + requirement + ".");
         }
     })
     return module.exports.handlers[handler](args, chatter, line);

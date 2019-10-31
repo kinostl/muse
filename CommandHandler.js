@@ -1,4 +1,3 @@
-const PubSub = require('pubsub-js');
 const debug = require('debug');
 const {MuseError} = require('./errors');
 const handlers = require('./Handlers');
@@ -19,7 +18,7 @@ module.exports = async function (chatter, line) {
         await handlers[command].handle(handler, args, chatter, line);
     }catch(e){
         if(e instanceof MuseError){
-            PubSub.publish("system." + chatter.id, e.message);
+            chatter.systemMessage(e.message);
         }else{
             debug('muse:core.error')(e);
         }

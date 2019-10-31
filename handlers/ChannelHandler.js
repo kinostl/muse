@@ -61,12 +61,12 @@ module.exports.handlers = {
         let channels = await db.getChannelList();
         if(channels.length < 1) throw new MuseError("No Channels.");
         let channel_list = channels.reduce((list, channel) => list + "\r\n Name: " + channel.name + ", Type: " + channel.type, "Channels: ");
-        PubSub.publish("system." + chatter.id, channel_list);
+        chatter.systemMessage(channel_list);
     },
     "add": async (args, chatter, line) => {
         //TODO rework this to get ooc from command
         db.addChannel(args[0],'ooc');
-        PubSub.publish("system." + chatter.id, "Added "+args[0]+" to channels.");
+        chatter.systemMessage("Added "+args[0]+" to channels.");
     },
 };
 module.exports.handle = async function (handler, args, chatter, line) {

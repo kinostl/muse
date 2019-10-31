@@ -56,6 +56,10 @@ Chatter.prototype.send = function(message, data) {
 
 };
 
+Chatter.prototype.systemMessage = function (data) {
+	PubSub.publish("system." + this.id, data);
+};
+
 Chatter.prototype.login = async function(name, password) {
 	let account = await db.login(name, password);
 	let channels = await db.getSubscriptions(account);

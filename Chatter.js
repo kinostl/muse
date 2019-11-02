@@ -118,4 +118,8 @@ Chatter.prototype.handleDisconnect = function() {
 	this.emit("disconnect",this);
 };
 
+Chatter.prototype.isAuthorized = function() {
+	return this.account !== null;
+};
+
 module.exports = Chatter;

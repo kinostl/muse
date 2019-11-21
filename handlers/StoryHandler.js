@@ -10,6 +10,10 @@ const {MuseError} = require('../errors');
  * story/title
  * story/summary
  * story/invite
+ * @chapter/as
+ * @chapter/post
+ * @chapter/discuss
+ * @article/discuss
  **/
 
 /***
@@ -35,8 +39,8 @@ module.exports.handlers = {
     "start": async function (args, chatter, line) {
         let [title] = args;
         let {chapter, discussion} = await db.addChapter(chatter.account, title);
-        chatter.subscribe("chat."+chapter);
-        chatter.subscribe("chat."+discussion);
+        chatter.subscribe("chapter."+chapter, title);
+        chatter.subscribe("discussion."+discussion, title);
         chatter.systemMessage("Prepared for the chapter `" + title + "`.");
     },
 };

@@ -21,6 +21,7 @@ function Chatter(socket, id) {
 	this.lineBuffer = new SocketLineBuffer(socket);
 	this.account    = null;
 	this.channels   = {};
+	this.chapterMaps = {};
 
 	this.lineBuffer.on("line", this.handleLine.bind(this));
 	this.socket.on("close", this.handleDisconnect.bind(this));
@@ -39,6 +40,14 @@ Chatter.prototype.send = function(message, data) {
 	if(message[0] === "system"){
 		let header = message[0];
 		output = "[" + header + "] " + data;
+	}
+	if(message[0] === "chapter"){
+		let header = chapterMaps[message[1]]
+		output = "{" + header + "} " + data;
+	}
+	if(message[0] === "discussion"){
+		let header = chapterMaps[message[1]]
+		output = "{" + header + "} " + data;
 	}
 	if(output){
 		this.socket.write(output+"\r\n");
@@ -79,10 +88,15 @@ Chatter.prototype.subscribedTo = function(channel){
 	return this.channels.hasOwnProperty(channel);
 }
 
-Chatter.prototype.subscribe = function(channel) {
+Chatter.prototype.subscribe = function(channel, title) {
 	this.channels[channel] = PubSub.subscribe(channel,this.send.bind(this));
 	if(channel.startsWith("chat")){
 		PubSub.publish(channel, this.id + " has joined the chat.");
+	}
+	if (
+		channel.startsWith("chapter")
+		|| channel.startsWith("discussion")) {
+		this.chapterMaps[channel] = title;
 	}
 }
 

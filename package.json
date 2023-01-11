@@ -6,7 +6,7 @@
   "dependencies": {
     "bcrypt": "^3.0.6",
     "debug": "^4.1.1",
-    "knex": "^0.19.5",
+    "knex": "^2.4.0",
     "pubsub-js": "^1.7.0",
     "sqlite3": "^4.1.0",
     "supports-color": "^7.1.0",
